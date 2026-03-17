@@ -412,6 +412,25 @@
         border-color: rgba(79, 209, 197, 0.7);
       }
 
+      .today-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 9px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+
+      .today-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+        background: #4fd1c5;
+      }
+
       @media (max-width: 640px) {
         .chart-hint,
         .metric-hint,
@@ -455,6 +474,10 @@
             <canvas id="trafficChart"></canvas>
             <div class="chart-hint">
               This graph stores recent days in your repository so you can visually compare today to the last visits.
+            </div>
+            <div class="today-pill" id="todayBadge" style="margin-top: 4px; display: none">
+              <span class="today-dot"></span>
+              <span id="todayBadgeText"></span>
             </div>
           </section>
 
@@ -606,6 +629,14 @@
         const labels = history.map((d) => d.date.slice(5));
         const ships = history.map((d) => d.shipsLast24h ?? null);
         const normal = history.map((d) => d.normalDaily ?? null);
+
+        const todayBadge = document.getElementById("todayBadge");
+        const todayBadgeText = document.getElementById("todayBadgeText");
+        if (history.length && todayBadge && todayBadgeText) {
+          const latest = history[history.length - 1];
+          todayBadge.style.display = "inline-flex";
+          todayBadgeText.textContent = `Today: ${latest.date}`;
+        }
 
         if (trafficChart) {
           trafficChart.data.labels = labels;
