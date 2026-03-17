@@ -1,0 +1,36 @@
+name: Update Hormuz history
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "5 0 * * *"
+
+jobs:
+  update-history:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Update history JSON
+        run: node scripts/update-history.mjs
+
+      - name: Commit and push if changed
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/hormuz-history.json
+          git commit -m "chore: update daily Hormuz history"
+          git push
+
