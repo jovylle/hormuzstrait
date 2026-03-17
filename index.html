@@ -305,13 +305,13 @@
       }
 
       .chart-card {
-        margin-top: 18px;
-        height: 260px;
+        margin-top: 0;
+        height: 280px;
+        grid-column: 1 / -1;
       }
 
       #trafficChart {
         width: 100% !important;
-        height: 100% !important;
       }
 
       .chart-hint {
@@ -339,6 +339,21 @@
         </header>
 
         <main>
+          <section class="card chart-card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Daily traffic vs normal</div>
+                <div class="card-subtitle">
+                  Compare recent days to a typical pre-war baseline to see if flows are recovering.
+                </div>
+              </div>
+            </div>
+            <canvas id="trafficChart"></canvas>
+            <div class="chart-hint">
+              This graph stores recent days in your repository so you can visually compare today to the last visits.
+            </div>
+          </section>
+
           <section class="card">
             <div class="card-header">
               <div>
@@ -408,21 +423,6 @@
             </div>
           </section>
         </main>
-
-        <section class="card chart-card">
-          <div class="card-header">
-            <div>
-              <div class="card-title">Daily traffic vs normal</div>
-              <div class="card-subtitle">
-                Compare recent days to a typical pre-war baseline to see if flows are recovering.
-              </div>
-            </div>
-          </div>
-          <canvas id="trafficChart"></canvas>
-          <div class="chart-hint">
-            This graph stores recent days in your browser so you can visually compare today to the last visits.
-          </div>
-        </section>
 
         <div class="footer-note">
           <div>
