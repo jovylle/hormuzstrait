@@ -6,7 +6,28 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
-    <title>Hormuz Traffic Monitor</title>
+    <title>Hormuz Traffic Monitor – Live Strait of Hormuz ship traffic vs normal</title>
+    <meta
+      name="description"
+      content="Live dashboard tracking daily ship traffic through the Strait of Hormuz vs typical pre-war normal levels, with crisis meter, oil prices, and global trade impact."
+    />
+    <meta name="robots" content="index,follow" />
+    <link rel="canonical" href="https://hormuz-strait-update.uft1.com/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Hormuz Traffic Monitor – Live Strait of Hormuz ship traffic" />
+    <meta
+      property="og:description"
+      content="See how many ships are crossing the Strait of Hormuz today compared to a typical pre-war day, plus crisis status, oil prices, and global trade impact."
+    />
+    <meta property="og:url" content="https://hormuz-strait-update.uft1.com/" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Hormuz Traffic Monitor – Live Strait of Hormuz ship traffic" />
+    <meta
+      name="twitter:description"
+      content="Follow daily ship traffic through the Strait of Hormuz and understand how far we are from normal flows."
+    />
     <style>
       :root {
         color-scheme: dark;
@@ -327,6 +348,12 @@
         text-decoration: underline;
       }
 
+      .impact-note {
+        margin-top: 6px;
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
+
       .nav {
         display: flex;
         gap: 12px;
@@ -402,9 +429,9 @@
           <section class="card chart-card">
             <div class="card-header">
               <div>
-                <div class="card-title">Daily traffic vs normal</div>
+                <div class="card-title">Daily traffic</div>
                 <div class="card-subtitle">
-                  Compare recent days to a typical pre-war baseline to see if flows are recovering.
+                  Each point is total ships per day through the Strait of Hormuz. Dotted line shows a typical pre-war normal of about 130 ships/day.
                 </div>
               </div>
               <div class="chart-range" id="chartRange">
@@ -497,6 +524,7 @@
               </div>
             </div>
             <div class="news-list" id="newsList"></div>
+            <div class="impact-note" id="impactNote"></div>
           </section>
         </main>
 
@@ -602,6 +630,7 @@
             responsive: true,
             plugins: {
               legend: {
+                onClick: null,
                 labels: {
                   color: "#e2e8f0",
                   font: { size: 11 },
@@ -651,6 +680,7 @@
         const oilPriceChip = document.getElementById("oilPriceChip");
         const oilPriceValue = document.getElementById("oilPriceValue");
         const newsListEl = document.getElementById("newsList");
+        const impactNoteEl = document.getElementById("impactNote");
 
         try {
           const res = await fetch("/.netlify/functions/hormuz", { cache: "no-store" });
@@ -724,6 +754,17 @@
             newsListEl.innerHTML = items.join("");
           } else {
             newsListEl.innerHTML = "";
+          }
+
+          if (data.globalTradeImpact && typeof data.globalTradeImpact.percentOfWorldOilAtRisk === "number") {
+            const pct = data.globalTradeImpact.percentOfWorldOilAtRisk;
+            const cost =
+              typeof data.globalTradeImpact.estimatedDailyCostBillions === "number"
+                ? `≈ $${data.globalTradeImpact.estimatedDailyCostBillions.toFixed(1)}B per day in disrupted trade.`
+                : "";
+            impactNoteEl.textContent = `${pct}% of the world's seaborne oil flows are at risk when Hormuz is disrupted ${cost}`;
+          } else if (impactNoteEl) {
+            impactNoteEl.textContent = "";
           }
 
           errorLineEl.textContent = "";

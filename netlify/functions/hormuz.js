@@ -49,6 +49,8 @@ export async function handler() {
         diplomacy: rootData.diplomacy ?? null,
         insurance: rootData.insurance ?? null,
         throughput: rootData.throughput ?? null,
+        globalTradeImpact: rootData.globalTradeImpact ?? null,
+        supplyChainImpact: rootData.supplyChainImpact ?? null,
         news: Array.isArray(rootData.news) ? rootData.news.slice(0, 5) : null,
         lastUpdated: rootData.lastUpdated ?? null,
       }),
