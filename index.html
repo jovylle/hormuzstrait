@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Hormuz Traffic Monitor</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #050913;
+        --card-bg: #0b1020;
+        --accent: #4fd1c5;
+        --accent-soft: rgba(79, 209, 197, 0.3);
+        --danger: #f56565;
+        --warning: #ecc94b;
+        --safe: #48bb78;
+        --text: #e2e8f0;
+        --muted: #718096;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+          sans-serif;
+        background: radial-gradient(circle at top, #111827 0, #050913 55%);
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+
+      .shell {
+        width: 100%;
+        max-width: 960px;
+        background: linear-gradient(135deg, #111827, #020617);
+        border-radius: 24px;
+        padding: 24px 24px 28px;
+        box-shadow:
+          0 32px 80px rgba(0, 0, 0, 0.8),
+          0 0 0 1px rgba(148, 163, 184, 0.1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .shell::before {
+        content: "";
+        position: absolute;
+        inset: -40%;
+        background:
+          radial-gradient(circle at 0% 0%, rgba(79, 209, 197, 0.09), transparent 55%),
+          radial-gradient(circle at 100% 100%, rgba(248, 113, 113, 0.06), transparent 55%);
+        opacity: 0.9;
+        pointer-events: none;
+      }
+
+      .shell-inner {
+        position: relative;
+        z-index: 1;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: flex-start;
+        margin-bottom: 20px;
+      }
+
+      .title-block h1 {
+        font-size: 1.4rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #e5e7eb;
+      }
+
+      .title-block p {
+        margin-top: 4px;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+
+      .badge-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #22c55e;
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.3);
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: 2fr 1.5fr;
+        gap: 20px;
+      }
+
+      @media (max-width: 768px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        background: rgba(15, 23, 42, 0.85);
+        border-radius: 18px;
+        padding: 16px 16px 18px;
+        border: 1px solid rgba(148, 163, 184, 0.15);
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.7);
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .card-title {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--muted);
+      }
+
+      .card-subtitle {
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .metric {
+        background: rgba(15, 23, 42, 0.85);
+        border-radius: 14px;
+        padding: 10px 10px 11px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+      }
+
+      .metric-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+
+      .metric-value {
+        font-size: 1.2rem;
+        font-weight: 600;
+      }
+
+      .metric-hint {
+        font-size: 0.75rem;
+        margin-top: 2px;
+        color: var(--muted);
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .crisis-meter {
+        position: relative;
+        padding-top: 8px;
+      }
+
+      .crisis-scale {
+        position: relative;
+        height: 12px;
+        border-radius: 999px;
+        background: linear-gradient(
+          90deg,
+          rgba(72, 187, 120, 0.1),
+          rgba(236, 201, 75, 0.14),
+          rgba(245, 101, 101, 0.2)
+        );
+        overflow: hidden;
+      }
+
+      .crisis-scale-inner {
+        position: absolute;
+        inset: 1px;
+        border-radius: inherit;
+        background: radial-gradient(
+          circle at 0% 50%,
+          rgba(72, 187, 120, 0.35),
+          transparent 55%
+        );
+        opacity: 0.7;
+        mix-blend-mode: screen;
+      }
+
+      .crisis-pointer {
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 2px;
+        height: 18px;
+        border-radius: 999px;
+        background: var(--accent);
+        box-shadow:
+          0 0 0 2px rgba(79, 209, 197, 0.5),
+          0 0 20px rgba(79, 209, 197, 0.8);
+        transition: left 0.9s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+
+      .crisis-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+
+      .crisis-status {
+        margin-top: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 10px;
+      }
+
+      .crisis-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        background: rgba(15, 23, 42, 0.9);
+      }
+
+      .crisis-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+      }
+
+      .crisis-text-main {
+        font-size: 0.85rem;
+      }
+
+      .crisis-text-secondary {
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
+
+      .footer-note {
+        margin-top: 14px;
+        font-size: 0.75rem;
+        color: var(--muted);
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .error {
+        color: var(--danger);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="shell-inner">
+        <header>
+          <div class="title-block">
+            <h1>Hormuz Traffic Monitor</h1>
+            <p>Live ship traffic vs historical normal through the Strait of Hormuz.</p>
+          </div>
+          <div class="badge">
+            <div class="badge-dot"></div>
+            Live feed · 1 min cache
+          </div>
+        </header>
+
+        <main>
+          <section class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Transit Snapshot</div>
+                <div id="statusLine" class="card-subtitle">
+                  Fetching latest numbers from Hormuz Strait Monitor…
+                </div>
+              </div>
+              <div class="card-subtitle" id="updatedAt"></div>
+            </div>
+
+            <div class="metrics">
+              <div class="metric">
+                <div class="metric-label">Ships last 24h</div>
+                <div class="metric-value" id="shipsLast24h">—</div>
+                <div class="metric-hint">Total transits recorded</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Current transits</div>
+                <div class="metric-value" id="currentTransits">—</div>
+                <div class="metric-hint">Vessels in the strait now</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Normal daily</div>
+                <div class="metric-value" id="normalDaily">—</div>
+                <div class="metric-hint">Typical peacetime volume</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Hormuz Crisis Meter</div>
+                <div class="card-subtitle">
+                  Based on traffic as a % of normal.
+                </div>
+              </div>
+              <div class="card-subtitle">
+                <span id="percentOfNormal">—</span> of normal
+              </div>
+            </div>
+
+            <div class="crisis-meter">
+              <div class="crisis-scale">
+                <div class="crisis-scale-inner"></div>
+                <div class="crisis-pointer" id="crisisPointer" style="left: 50%"></div>
+              </div>
+              <div class="crisis-labels">
+                <span>🟢 Normal</span>
+                <span>🟡 Reduced</span>
+                <span>🔴 Disruption</span>
+              </div>
+
+              <div class="crisis-status">
+                <div>
+                  <div class="crisis-text-main" id="crisisHeadline">Calculating status…</div>
+                  <div class="crisis-text-secondary" id="crisisDetail">
+                    Waiting for fresh data from the monitoring API.
+                  </div>
+                </div>
+                <div class="crisis-pill">
+                  <div class="crisis-dot" id="crisisDot"></div>
+                  <span id="crisisLabel">Unknown</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <div class="footer-note">
+          <div>
+            Data proxied via Netlify function calling
+            <span class="muted">hormuzstraitmonitor.com/api/dashboard</span>.
+          </div>
+          <div id="errorLine" class="error"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function classifyCrisis(percent) {
+        if (percent === null || isNaN(percent)) {
+          return {
+            label: "Unknown",
+            headline: "Traffic status unknown",
+            detail: "Upstream data is missing or temporarily unavailable.",
+            dotColor: "#718096",
+            pointerPercent: 50,
+          };
+        }
+
+        if (percent >= 70) {
+          return {
+            label: "Normal",
+            headline: "🟢 Normal shipping conditions",
+            detail:
+              "Traffic levels are broadly in line with typical peacetime flows through the Strait of Hormuz.",
+            dotColor: "#48bb78",
+            pointerPercent: Math.min(percent, 110),
+          };
+        }
+
+        if (percent >= 35) {
+          return {
+            label: "Reduced traffic",
+            headline: "🟡 Reduced traffic",
+            detail:
+              "Flows are noticeably below normal. Could reflect market conditions, weather, or early-stage risk.",
+            dotColor: "#ecc94b",
+            pointerPercent: Math.max(20, Math.min(percent, 90)),
+          };
+        }
+
+        return {
+          label: "Strait disruption",
+          headline: "🔴 Potential disruption signal",
+          detail:
+            "Traffic is severely below normal levels. This can indicate acute geopolitical risk or physical disruption.",
+          dotColor: "#f56565",
+          pointerPercent: Math.max(5, Math.min(percent, 80)),
+        };
+      }
+
+      async function loadHormuzData() {
+        const shipsLast24hEl = document.getElementById("shipsLast24h");
+        const currentTransitsEl = document.getElementById("currentTransits");
+        const normalDailyEl = document.getElementById("normalDaily");
+        const percentOfNormalEl = document.getElementById("percentOfNormal");
+        const statusLineEl = document.getElementById("statusLine");
+        const updatedAtEl = document.getElementById("updatedAt");
+        const errorLineEl = document.getElementById("errorLine");
+
+        const crisisPointerEl = document.getElementById("crisisPointer");
+        const crisisDotEl = document.getElementById("crisisDot");
+        const crisisLabelEl = document.getElementById("crisisLabel");
+        const crisisHeadlineEl = document.getElementById("crisisHeadline");
+        const crisisDetailEl = document.getElementById("crisisDetail");
+
+        try {
+          const res = await fetch("/.netlify/functions/hormuz", { cache: "no-store" });
+
+          if (!res.ok) {
+            throw new Error("Function returned " + res.status);
+          }
+
+          const data = await res.json();
+
+          const shipsLast24h = data.shipsLast24h;
+          const currentTransits = data.currentTransits;
+          const normalDaily = data.normalDaily;
+          const percentOfNormal = data.percentOfNormal;
+
+          shipsLast24hEl.textContent =
+            shipsLast24h != null ? shipsLast24h.toLocaleString() : "—";
+          currentTransitsEl.textContent =
+            currentTransits != null ? currentTransits.toLocaleString() : "—";
+          normalDailyEl.textContent =
+            normalDaily != null ? normalDaily.toLocaleString() : "—";
+          percentOfNormalEl.textContent =
+            percentOfNormal != null ? percentOfNormal.toFixed(1) + "%" : "—";
+
+          const now = new Date();
+          updatedAtEl.textContent =
+            "Updated " +
+            now.toLocaleTimeString(undefined, {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+
+          statusLineEl.textContent =
+            "Ships in the last 24 hours vs typical daily volume.";
+
+          const crisis = classifyCrisis(
+            typeof percentOfNormal === "number" ? percentOfNormal : null
+          );
+          crisisLabelEl.textContent = crisis.label;
+          crisisHeadlineEl.textContent = crisis.headline;
+          crisisDetailEl.textContent = crisis.detail;
+          crisisDotEl.style.backgroundColor = crisis.dotColor;
+
+          const pointerLeft = Math.max(0, Math.min(100, crisis.pointerPercent));
+          crisisPointerEl.style.left = pointerLeft + "%";
+
+          errorLineEl.textContent = "";
+        } catch (err) {
+          console.error(err);
+          errorLineEl.textContent =
+            "Could not load Hormuz data. Check Netlify function logs.";
+          statusLineEl.textContent = "Data unavailable.";
+        }
+      }
+
+      loadHormuzData();
+      setInterval(loadHormuzData, 60 * 1000);
+    </script>
+  </body>
+  </html>
+
