@@ -352,14 +352,32 @@
         grid-column: 1 / -1;
       }
 
-      #trafficChart {
-        width: 100% !important;
-      }
-
       .chart-hint {
         margin-top: 6px;
         font-size: 0.78rem;
         color: var(--muted);
+      }
+
+      .chart-range {
+        margin-bottom: 8px;
+        display: inline-flex;
+        gap: 6px;
+        font-size: 0.75rem;
+      }
+
+      .chart-range button {
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        background: rgba(15, 23, 42, 0.9);
+        color: var(--muted);
+        padding: 3px 8px;
+        cursor: pointer;
+      }
+
+      .chart-range button.active {
+        background: rgba(79, 209, 197, 0.18);
+        color: #e2e8f0;
+        border-color: rgba(79, 209, 197, 0.7);
       }
     </style>
   </head>
@@ -388,6 +406,11 @@
                 <div class="card-subtitle">
                   Compare recent days to a typical pre-war baseline to see if flows are recovering.
                 </div>
+              </div>
+              <div class="chart-range" id="chartRange">
+                <button type="button" data-range="3">3 days</button>
+                <button type="button" data-range="7">7 days</button>
+                <button type="button" data-range="30" class="active">30 days</button>
               </div>
             </div>
             <canvas id="trafficChart"></canvas>
@@ -532,6 +555,7 @@
       }
 
       let trafficChart;
+      let fullHistory = [];
 
       function renderChart(history) {
         const ctx = document.getElementById("trafficChart");
@@ -719,16 +743,38 @@
           if (!res.ok) return;
           const history = await res.json();
           if (Array.isArray(history) && history.length) {
-            renderChart(history);
+            fullHistory = history.slice().sort((a, b) =>
+              a.date < b.date ? -1 : a.date > b.date ? 1 : 0
+            );
+            renderChart(getHistorySlice(30));
           }
         } catch (e) {
           // fail silently – snapshot UI still useful without history
         }
       }
 
+      function getHistorySlice(range) {
+        if (!Array.isArray(fullHistory) || !fullHistory.length) return [];
+        if (!range || range >= fullHistory.length) return fullHistory;
+        return fullHistory.slice(-range);
+      }
+
       loadHistory();
       loadHormuzData();
       setInterval(loadHormuzData, 60 * 1000);
+
+      const chartRangeEl = document.getElementById("chartRange");
+      if (chartRangeEl) {
+        chartRangeEl.addEventListener("click", (event) => {
+          const btn = event.target.closest("button[data-range]");
+          if (!btn) return;
+          const range = parseInt(btn.getAttribute("data-range"), 10);
+          Array.from(chartRangeEl.querySelectorAll("button")).forEach((b) =>
+            b.classList.toggle("active", b === btn)
+          );
+          renderChart(getHistorySlice(range));
+        });
+      }
     </script>
   </body>
   </html>
