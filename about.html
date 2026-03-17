@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About · Hormuz Traffic Monitor</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #050913;
+        --card-bg: #0b1020;
+        --accent: #4fd1c5;
+        --text: #e2e8f0;
+        --muted: #a0aec0;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+          sans-serif;
+        background: radial-gradient(circle at top, #111827 0, #050913 55%);
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+
+      .shell {
+        width: 100%;
+        max-width: 720px;
+        background: linear-gradient(135deg, #111827, #020617);
+        border-radius: 24px;
+        padding: 24px 24px 28px;
+        box-shadow:
+          0 32px 80px rgba(0, 0, 0, 0.8),
+          0 0 0 1px rgba(148, 163, 184, 0.1);
+      }
+
+      h1 {
+        font-size: 1.4rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+
+      p {
+        margin-bottom: 10px;
+        font-size: 0.95rem;
+        color: var(--muted);
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .back-link {
+        display: inline-block;
+        margin-top: 14px;
+        font-size: 0.9rem;
+      }
+
+      .tagline {
+        margin-bottom: 18px;
+      }
+
+      .list {
+        margin: 8px 0 4px;
+        padding-left: 18px;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <h1>About this dashboard</h1>
+      <p class="tagline">
+        This is an independent, educational dashboard focused on how much oil
+        and cargo is flowing through the Strait of Hormuz.
+      </p>
+      <p>
+        Live ship traffic numbers are sourced from
+        <a href="https://hormuzstraitmonitor.com" target="_blank" rel="noreferrer">
+          hormuzstraitmonitor.com
+        </a>
+        via their public dashboard API. That project itself aggregates data from
+        services such as MarineTraffic, VesselFinder, oil market feeds, and shipping
+        insurance data.
+      </p>
+      <p>
+        This site does not represent any government, company, or institution. The
+        goal is to give ordinary people &mdash; especially overseas workers and
+        seafarers &mdash; a clear visual sense of whether traffic is:
+      </p>
+      <ul class="list">
+        <li>close to normal levels,</li>
+        <li>slow and reduced, or</li>
+        <li>showing signs of serious disruption.</li>
+      </ul>
+      <p>
+        For Filipino users, the idea is simple: if ships and tankers keep moving
+        through Hormuz, global trade and oil flows are closer to normal. If the
+        lines stay very low for many days, that can signal higher risk for jobs,
+        fuel prices, and shipping routes.
+      </p>
+      <a class="back-link" href="index.html">← Back to live view</a>
+    </div>
+  </body>
+  </html>
+

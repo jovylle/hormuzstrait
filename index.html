@@ -284,6 +284,35 @@
       .error {
         color: var(--danger);
       }
+
+      .nav {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      .nav a {
+        color: inherit;
+        text-decoration: none;
+        opacity: 0.9;
+      }
+
+      .nav a:hover {
+        opacity: 1;
+        text-decoration: underline;
+      }
+
+      .chart-card {
+        margin-top: 18px;
+      }
+
+      .chart-hint {
+        margin-top: 6px;
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
     </style>
   </head>
   <body>
@@ -292,11 +321,14 @@
         <header>
           <div class="title-block">
             <h1>Hormuz Traffic Monitor</h1>
-            <p>Live ship traffic vs historical normal through the Strait of Hormuz.</p>
+            <p>Live ship traffic vs a typical pre-war baseline through the Strait of Hormuz.</p>
           </div>
-          <div class="badge">
-            <div class="badge-dot"></div>
-            Live feed · 1 min cache
+          <div class="nav">
+            <div class="badge">
+              <div class="badge-dot"></div>
+              Live feed · 1 min cache
+            </div>
+            <a href="about.html">About this data</a>
           </div>
         </header>
 
@@ -371,16 +403,31 @@
           </section>
         </main>
 
+        <section class="card chart-card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Daily traffic vs normal</div>
+              <div class="card-subtitle">
+                Compare recent days to a typical pre-war baseline to see if flows are recovering.
+              </div>
+            </div>
+          </div>
+          <canvas id="trafficChart" height="140"></canvas>
+          <div class="chart-hint">
+            This graph stores recent days in your browser so you can visually compare today to the last visits.
+          </div>
+        </section>
+
         <div class="footer-note">
           <div>
-            Data proxied via Netlify function calling
-            <span class="muted">hormuzstraitmonitor.com/api/dashboard</span>.
+            Live dashboard for watching ship traffic through the Strait of Hormuz.
           </div>
           <div id="errorLine" class="error"></div>
         </div>
       </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script>
       function classifyCrisis(percent) {
         if (percent === null || isNaN(percent)) {
@@ -423,6 +470,115 @@
           dotColor: "#f56565",
           pointerPercent: Math.max(5, Math.min(percent, 80)),
         };
+      }
+
+      function updateLocalHistory(entry) {
+        const key = "hormuzDailyHistory";
+        const today = new Date().toISOString().slice(0, 10);
+        let history = [];
+        try {
+          history = JSON.parse(localStorage.getItem(key)) || [];
+        } catch {
+          history = [];
+        }
+
+        const withoutToday = history.filter((d) => d.date !== today);
+        withoutToday.push({
+          date: today,
+          shipsLast24h: entry.shipsLast24h,
+          normalDaily: entry.normalDaily,
+          percentOfNormal: entry.percentOfNormal,
+        });
+
+        withoutToday.sort((a, b) => (a.date < b.date ? -1 : 1));
+        const trimmed = withoutToday.slice(-30);
+        localStorage.setItem(key, JSON.stringify(trimmed));
+        return trimmed;
+      }
+
+      function getLocalHistory() {
+        try {
+          return JSON.parse(localStorage.getItem("hormuzDailyHistory")) || [];
+        } catch {
+          return [];
+        }
+      }
+
+      let trafficChart;
+
+      function renderChart(history) {
+        const ctx = document.getElementById("trafficChart");
+        if (!ctx || !window.Chart) return;
+
+        const labels = history.map((d) => d.date.slice(5));
+        const ships = history.map((d) => d.shipsLast24h ?? null);
+        const normal = history.map((d) => d.normalDaily ?? null);
+
+        if (trafficChart) {
+          trafficChart.data.labels = labels;
+          trafficChart.data.datasets[0].data = ships;
+          trafficChart.data.datasets[1].data = normal;
+          trafficChart.update();
+          return;
+        }
+
+        trafficChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Ships last 24h",
+                data: ships,
+                borderColor: "#4fd1c5",
+                backgroundColor: "rgba(79, 209, 197, 0.2)",
+                tension: 0.3,
+                fill: true,
+                pointRadius: 3,
+              },
+              {
+                label: "Normal daily traffic",
+                data: normal,
+                borderColor: "#718096",
+                borderDash: [4, 4],
+                tension: 0.1,
+                pointRadius: 0,
+                fill: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                labels: {
+                  color: "#e2e8f0",
+                  font: { size: 11 },
+                },
+              },
+              tooltip: {
+                callbacks: {
+                  title(items) {
+                    const idx = items[0].dataIndex;
+                    const full = history[idx]?.date;
+                    return full || items[0].label;
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                ticks: { color: "#a0aec0", font: { size: 10 } },
+                grid: { color: "rgba(148, 163, 184, 0.15)" },
+              },
+              y: {
+                ticks: { color: "#a0aec0", font: { size: 10 } },
+                grid: { color: "rgba(148, 163, 184, 0.12)" },
+              },
+            },
+          },
+        });
       }
 
       async function loadHormuzData() {
@@ -485,6 +641,13 @@
           const pointerLeft = Math.max(0, Math.min(100, crisis.pointerPercent));
           crisisPointerEl.style.left = pointerLeft + "%";
 
+          const history = updateLocalHistory({
+            shipsLast24h,
+            normalDaily,
+            percentOfNormal,
+          });
+          renderChart(history);
+
           errorLineEl.textContent = "";
         } catch (err) {
           console.error(err);
@@ -494,6 +657,10 @@
         }
       }
 
+      const existing = getLocalHistory();
+      if (existing.length) {
+        renderChart(existing);
+      }
       loadHormuzData();
       setInterval(loadHormuzData, 60 * 1000);
     </script>
