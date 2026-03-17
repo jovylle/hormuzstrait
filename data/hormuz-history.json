@@ -1,2 +1,27 @@
-[]
+[
+  {
+    "date": "2026-03-15",
+    "shipsLast24h": 62,
+    "normalDaily": 60,
+    "percentOfNormal": 103.3
+  },
+  {
+    "date": "2026-03-16",
+    "shipsLast24h": 59,
+    "normalDaily": 60,
+    "percentOfNormal": 98.3
+  },
+  {
+    "date": "2026-03-17",
+    "shipsLast24h": 2,
+    "normalDaily": 60,
+    "percentOfNormal": 3.3
+  },
+  {
+    "date": "2026-03-18",
+    "shipsLast24h": 2,
+    "normalDaily": 60,
+    "percentOfNormal": 3.3
+  }
+]
 
