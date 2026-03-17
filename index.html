@@ -354,6 +354,57 @@
         color: var(--muted);
       }
 
+      .support-grid {
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 14px;
+      }
+
+      @media (max-width: 768px) {
+        .support-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .support-text {
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      .support-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .support-btn {
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        padding: 5px 12px;
+        font-size: 0.8rem;
+        background: rgba(15, 23, 42, 0.9);
+        color: #e2e8f0;
+        text-decoration: none;
+      }
+
+      .support-btn:hover {
+        border-color: rgba(79, 209, 197, 0.8);
+      }
+
+      .support-qr {
+        text-align: right;
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
+
+      .support-qr img {
+        max-width: 120px;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+      }
+
       .nav {
         display: flex;
         gap: 12px;
@@ -568,6 +619,26 @@
         <div class="footer-note">
           <div>
             Live dashboard for watching ship traffic through the Strait of Hormuz.
+            <div class="support-grid">
+              <div class="support-text">
+                If this dashboard helps you follow the crisis, you can support its
+                upkeep and hosting.
+                <div class="support-actions">
+                  <a
+                    class="support-btn"
+                    href="https://buymeacoffee.com/twero001"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Buy me a coffee
+                  </a>
+                </div>
+              </div>
+              <div class="support-qr">
+                <div>GCash (scan to send)</div>
+                <img src="assets/gcash-qr.png" alt="GCash QR for donations" />
+              </div>
+            </div>
           </div>
           <div id="errorLine" class="error"></div>
         </div>
@@ -626,7 +697,9 @@
         const ctx = document.getElementById("trafficChart");
         if (!ctx || !window.Chart) return;
 
-        const labels = history.map((d) => d.date.slice(5));
+        const labels = history.map((d, idx) =>
+          idx === history.length - 1 ? "Today" : d.date.slice(5)
+        );
         const ships = history.map((d) => d.shipsLast24h ?? null);
         const normal = history.map((d) => d.normalDaily ?? null);
 
@@ -686,7 +759,9 @@
                   title(items) {
                     const idx = items[0].dataIndex;
                     const full = history[idx]?.date;
-                    return full || items[0].label;
+                    if (!full) return items[0].label;
+                    const isToday = idx === history.length - 1;
+                    return isToday ? `${full} (today)` : full;
                   },
                 },
               },
