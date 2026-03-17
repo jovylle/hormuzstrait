@@ -29,7 +29,8 @@ export async function handler() {
     }
 
     const json = await res.json();
-    const shipData = json?.data?.shipCount ?? {};
+    const rootData = json?.data ?? {};
+    const shipData = rootData?.shipCount ?? {};
 
     return {
       statusCode: 200,
@@ -42,6 +43,14 @@ export async function handler() {
         currentTransits: shipData.currentTransits ?? null,
         normalDaily: shipData.normalDaily ?? null,
         percentOfNormal: shipData.percentOfNormal ?? null,
+        straitStatus: rootData.straitStatus ?? null,
+        oilPrice: rootData.oilPrice ?? null,
+        strandedVessels: rootData.strandedVessels ?? null,
+        diplomacy: rootData.diplomacy ?? null,
+        insurance: rootData.insurance ?? null,
+        throughput: rootData.throughput ?? null,
+        news: Array.isArray(rootData.news) ? rootData.news.slice(0, 5) : null,
+        lastUpdated: rootData.lastUpdated ?? null,
       }),
     };
   } catch (error) {

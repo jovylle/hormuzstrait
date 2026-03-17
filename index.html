@@ -285,6 +285,48 @@
         color: var(--danger);
       }
 
+      .status-chips {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: flex-end;
+        text-align: right;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        background: rgba(15, 23, 42, 0.9);
+      }
+
+      .chip-label {
+        font-weight: 500;
+      }
+
+      .chip-value {
+        color: var(--muted);
+      }
+
+      .news-list {
+        margin-top: 8px;
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
+
+      .news-item a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .news-item a:hover {
+        text-decoration: underline;
+      }
+
       .nav {
         display: flex;
         gap: 12px;
@@ -392,8 +434,18 @@
                   Based on traffic as a % of normal.
                 </div>
               </div>
-              <div class="card-subtitle">
-                <span id="percentOfNormal">—</span> of normal
+              <div class="status-chips">
+                <div class="card-subtitle">
+                  <span id="percentOfNormal">—</span> of normal
+                </div>
+                <div class="chip" id="straitStatusChip" style="display:none">
+                  <span class="chip-label" id="straitStatusLabel">Strait status</span>
+                  <span class="chip-value" id="straitStatusValue">—</span>
+                </div>
+                <div class="chip" id="oilPriceChip" style="display:none">
+                  <span class="chip-label">Brent</span>
+                  <span class="chip-value" id="oilPriceValue">—</span>
+                </div>
               </div>
             </div>
 
@@ -421,6 +473,7 @@
                 </div>
               </div>
             </div>
+            <div class="news-list" id="newsList"></div>
           </section>
         </main>
 
@@ -569,6 +622,12 @@
         const crisisHeadlineEl = document.getElementById("crisisHeadline");
         const crisisDetailEl = document.getElementById("crisisDetail");
 
+        const straitStatusChip = document.getElementById("straitStatusChip");
+        const straitStatusValue = document.getElementById("straitStatusValue");
+        const oilPriceChip = document.getElementById("oilPriceChip");
+        const oilPriceValue = document.getElementById("oilPriceValue");
+        const newsListEl = document.getElementById("newsList");
+
         try {
           const res = await fetch("/.netlify/functions/hormuz", { cache: "no-store" });
 
@@ -613,6 +672,35 @@
 
           const pointerLeft = Math.max(0, Math.min(100, crisis.pointerPercent));
           crisisPointerEl.style.left = pointerLeft + "%";
+
+          if (data.straitStatus && data.straitStatus.status) {
+            straitStatusChip.style.display = "inline-flex";
+            straitStatusValue.textContent = data.straitStatus.status;
+          } else {
+            straitStatusChip.style.display = "none";
+          }
+
+          if (data.oilPrice && typeof data.oilPrice.brentPrice === "number") {
+            oilPriceChip.style.display = "inline-flex";
+            const price = data.oilPrice.brentPrice.toFixed(2);
+            const change =
+              typeof data.oilPrice.changePercent24h === "number"
+                ? ` (${data.oilPrice.changePercent24h.toFixed(1)}%)`
+                : "";
+            oilPriceValue.textContent = `$${price}${change}`;
+          } else {
+            oilPriceChip.style.display = "none";
+          }
+
+          if (Array.isArray(data.news) && data.news.length) {
+            const items = data.news.slice(0, 3).map((item) => {
+              const src = item.source ? ` · ${item.source}` : "";
+              return `<div class="news-item"><a href="${item.url}" target="_blank" rel="noreferrer">${item.title}</a><span>${src}</span></div>`;
+            });
+            newsListEl.innerHTML = items.join("");
+          } else {
+            newsListEl.innerHTML = "";
+          }
 
           errorLineEl.textContent = "";
         } catch (err) {
