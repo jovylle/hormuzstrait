@@ -478,38 +478,6 @@
         };
       }
 
-      function updateLocalHistory(entry) {
-        const key = "hormuzDailyHistory";
-        const today = new Date().toISOString().slice(0, 10);
-        let history = [];
-        try {
-          history = JSON.parse(localStorage.getItem(key)) || [];
-        } catch {
-          history = [];
-        }
-
-        const withoutToday = history.filter((d) => d.date !== today);
-        withoutToday.push({
-          date: today,
-          shipsLast24h: entry.shipsLast24h,
-          normalDaily: entry.normalDaily,
-          percentOfNormal: entry.percentOfNormal,
-        });
-
-        withoutToday.sort((a, b) => (a.date < b.date ? -1 : 1));
-        const trimmed = withoutToday.slice(-30);
-        localStorage.setItem(key, JSON.stringify(trimmed));
-        return trimmed;
-      }
-
-      function getLocalHistory() {
-        try {
-          return JSON.parse(localStorage.getItem("hormuzDailyHistory")) || [];
-        } catch {
-          return [];
-        }
-      }
-
       let trafficChart;
 
       function renderChart(history) {
@@ -646,13 +614,6 @@
           const pointerLeft = Math.max(0, Math.min(100, crisis.pointerPercent));
           crisisPointerEl.style.left = pointerLeft + "%";
 
-          const history = updateLocalHistory({
-            shipsLast24h,
-            normalDaily,
-            percentOfNormal,
-          });
-          renderChart(history);
-
           errorLineEl.textContent = "";
         } catch (err) {
           console.error(err);
@@ -662,10 +623,22 @@
         }
       }
 
-      const existing = getLocalHistory();
-      if (existing.length) {
-        renderChart(existing);
+      async function loadHistory() {
+        try {
+          const res = await fetch("/.netlify/functions/history", {
+            cache: "no-store",
+          });
+          if (!res.ok) return;
+          const history = await res.json();
+          if (Array.isArray(history) && history.length) {
+            renderChart(history);
+          }
+        } catch (e) {
+          // fail silently – snapshot UI still useful without history
+        }
       }
+
+      loadHistory();
       loadHormuzData();
       setInterval(loadHormuzData, 60 * 1000);
     </script>
