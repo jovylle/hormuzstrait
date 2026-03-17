@@ -375,8 +375,13 @@
 
       .chart-card {
         margin-top: 0;
-        height: 280px;
         grid-column: 1 / -1;
+      }
+
+      .chart-card canvas {
+        display: block;
+        width: 100% !important;
+        height: auto !important;
       }
 
       .chart-hint {
@@ -430,8 +435,7 @@
             <div class="card-header">
               <div>
                 <div class="card-title">Daily traffic</div>
-                <div class="card-subtitle">
-                  Each point is total ships per day through the Strait of Hormuz. Dotted line shows a typical pre-war normal of about 130 ships/day.
+                <div class="card-subtitle">Dotted line shows a typical pre-war normal of about 130 ships/day.
                 </div>
               </div>
               <div class="chart-range" id="chartRange">
@@ -459,9 +463,9 @@
 
             <div class="metrics">
               <div class="metric">
-                <div class="metric-label">Ships last 24h</div>
+                <div class="metric-label">Ships today</div>
                 <div class="metric-value" id="shipsLast24h">—</div>
-                <div class="metric-hint">Total transits recorded</div>
+                <div class="metric-hint">Total ships in the last 24 hours</div>
               </div>
               <div class="metric">
                 <div class="metric-label">Current transits</div>
@@ -614,15 +618,6 @@
                 tension: 0.3,
                 fill: true,
                 pointRadius: 3,
-              },
-              {
-                label: "Normal daily traffic",
-                data: normal,
-                borderColor: "#718096",
-                borderDash: [4, 4],
-                tension: 0.1,
-                pointRadius: 0,
-                fill: false,
               },
             ],
           },
