@@ -158,14 +158,14 @@
       }
 
       .card-title {
-        font-size: 0.85rem;
+        font-size: 0.95rem;
         text-transform: uppercase;
         letter-spacing: 0.16em;
         color: var(--muted);
       }
 
       .card-subtitle {
-        font-size: 0.8rem;
+        font-size: 0.9rem;
         color: var(--muted);
       }
 
@@ -192,7 +192,7 @@
       }
 
       .metric-value {
-        font-size: 1.2rem;
+        font-size: 1.35rem;
         font-weight: 600;
       }
 
@@ -285,11 +285,11 @@
       }
 
       .crisis-text-main {
-        font-size: 0.85rem;
+        font-size: 0.95rem;
       }
 
       .crisis-text-secondary {
-        font-size: 0.78rem;
+        font-size: 0.84rem;
         color: var(--muted);
       }
 
@@ -411,6 +411,14 @@
         color: #e2e8f0;
         border-color: rgba(79, 209, 197, 0.7);
       }
+
+      @media (max-width: 640px) {
+        .chart-hint,
+        .metric-hint,
+        .impact-note {
+          display: none;
+        }
+      }
     </style>
   </head>
   <body>
@@ -465,7 +473,9 @@
               <div class="metric">
                 <div class="metric-label">Ships today</div>
                 <div class="metric-value" id="shipsLast24h">—</div>
-                <div class="metric-hint">Total ships in the last 24 hours</div>
+                <div class="metric-hint" title="Total ships recorded over the last 24 hours.">
+                  Total ships in the last 24 hours
+                </div>
               </div>
               <div class="metric">
                 <div class="metric-label">Current transits</div>
@@ -618,6 +628,15 @@
                 tension: 0.3,
                 fill: true,
                 pointRadius: 3,
+              },
+              {
+                label: "Normal daily traffic (baseline)",
+                data: normal,
+                borderColor: "#718096",
+                borderDash: [4, 4],
+                tension: 0.1,
+                pointRadius: 0,
+                fill: false,
               },
             ],
           },
