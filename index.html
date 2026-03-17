@@ -306,6 +306,12 @@
 
       .chart-card {
         margin-top: 18px;
+        height: 260px;
+      }
+
+      #trafficChart {
+        width: 100% !important;
+        height: 100% !important;
       }
 
       .chart-hint {
@@ -412,7 +418,7 @@
               </div>
             </div>
           </div>
-          <canvas id="trafficChart" height="140"></canvas>
+          <canvas id="trafficChart"></canvas>
           <div class="chart-hint">
             This graph stores recent days in your browser so you can visually compare today to the last visits.
           </div>
@@ -549,7 +555,6 @@
           },
           options: {
             responsive: true,
-            maintainAspectRatio: false,
             plugins: {
               legend: {
                 labels: {
