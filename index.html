@@ -399,6 +399,31 @@
         color: var(--muted);
       }
 
+      .support-qr summary {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        user-select: none;
+        padding: 5px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        background: rgba(15, 23, 42, 0.9);
+      }
+
+      .support-qr summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .support-qr img {
+        display: none;
+        margin-top: 10px;
+      }
+
+      .support-qr[open] img {
+        display: inline-block;
+      }
+
       .support-qr img {
         max-width: 120px;
         border-radius: 12px;
@@ -634,10 +659,10 @@
                   </a>
                 </div>
               </div>
-              <div class="support-qr">
-                <div>GCash (scan to send)</div>
+              <details class="support-qr">
+                <summary>GCash QR (tap to show)</summary>
                 <img src="assets/gcash-qr.png" alt="GCash QR for donations" />
-              </div>
+              </details>
             </div>
           </div>
           <div id="errorLine" class="error"></div>
