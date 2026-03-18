@@ -1,3 +1,5 @@
+const BASELINE_NORMAL_DAILY = 130;
+
 export async function handler() {
   try {
     const res = await fetch("https://hormuzstraitmonitor.com/api/dashboard", {
@@ -32,6 +34,12 @@ export async function handler() {
     const rootData = json?.data ?? {};
     const shipData = rootData?.shipCount ?? {};
 
+    const shipsLast24h = shipData.last24h ?? null;
+    const percentOfNormal =
+      typeof shipsLast24h === "number"
+        ? (shipsLast24h / BASELINE_NORMAL_DAILY) * 100
+        : null;
+
     return {
       statusCode: 200,
       headers: {
@@ -39,10 +47,10 @@ export async function handler() {
         "Cache-Control": "public, max-age=60", // small cache to avoid hammering origin
       },
       body: JSON.stringify({
-        shipsLast24h: shipData.last24h ?? null,
+        shipsLast24h,
         currentTransits: shipData.currentTransits ?? null,
-        normalDaily: shipData.normalDaily ?? null,
-        percentOfNormal: shipData.percentOfNormal ?? null,
+        normalDaily: BASELINE_NORMAL_DAILY,
+        percentOfNormal,
         straitStatus: rootData.straitStatus ?? null,
         oilPrice: rootData.oilPrice ?? null,
         strandedVessels: rootData.strandedVessels ?? null,
