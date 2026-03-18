@@ -436,6 +436,84 @@
         border: 1px solid rgba(148, 163, 184, 0.3);
       }
 
+      .feedback-widget {
+        position: fixed;
+        right: 28px;
+        bottom: 28px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 12px;
+        z-index: 1200;
+      }
+
+      .feedback-button {
+        background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+        color: white;
+        border: none;
+        border-radius: 999px;
+        padding: 10px 18px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 12px 30px rgba(14, 165, 233, 0.45);
+        transition: transform 150ms ease;
+      }
+
+      .feedback-button:active {
+        transform: scale(0.98);
+      }
+
+      .feedback-panel {
+        width: min(320px, calc(100vw - 32px));
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        border-radius: 18px;
+        padding: 16px;
+        box-shadow: 0 30px 60px rgba(5, 9, 19, 0.6);
+        display: none;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .feedback-panel.show {
+        display: flex;
+      }
+
+      .feedback-panel header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      .feedback-panel form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .feedback-panel input,
+      .feedback-panel textarea {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.5);
+        background: rgba(15, 23, 42, 0.75);
+        color: var(--text);
+        padding: 8px 10px;
+        font-size: 0.9rem;
+      }
+
+      .feedback-panel button[type="submit"] {
+        border: none;
+        border-radius: 10px;
+        background: #f59e0b;
+        padding: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        color: #050913;
+      }
+
       .nav {
         display: flex;
         gap: 12px;
@@ -727,8 +805,39 @@
       </div>
     </div>
 
+    <div class="feedback-widget">
+      <button class="feedback-button" id="feedbackToggle" type="button">
+        Feedback
+      </button>
+      <div class="feedback-panel" id="feedbackPanel">
+        <header>
+          <span>Feedback</span>
+          <button type="button" id="feedbackClose" style="background:none;border:none;color:var(--muted);font-weight:600;cursor:pointer;">✕</button>
+        </header>
+        <form action="https://api.web3forms.com/submit" method="POST" target="_blank">
+          <input type="hidden" name="access_key" value="4a0e9849-ac3e-47bd-a6c6-005fd77823ed" />
+          <input type="hidden" name="redirect" value="https://hormuz-strait-update.uft1.com/" />
+          <input type="text" name="name" placeholder="Your name" required />
+          <input type="email" name="email" placeholder="Email" required />
+          <textarea name="message" placeholder="Tell us what you noticed…" rows="4" required></textarea>
+          <button type="submit">Submit Feedback</button>
+        </form>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script>
+      const feedbackToggle = document.getElementById("feedbackToggle");
+      const feedbackPanel = document.getElementById("feedbackPanel");
+      const feedbackClose = document.getElementById("feedbackClose");
+
+      feedbackToggle?.addEventListener("click", () => {
+        feedbackPanel?.classList.toggle("show");
+      });
+
+      feedbackClose?.addEventListener("click", () => {
+        feedbackPanel?.classList.remove("show");
+      });
       function classifyCrisis(percent) {
         if (percent === null || isNaN(percent)) {
           return {
