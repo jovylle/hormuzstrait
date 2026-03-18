@@ -1,37 +1,48 @@
-const API_URL = "https://api.oilpriceapi.com/v1/prices/past_month";
+import { readFileSync, existsSync } from "fs";
+import { join } from "path";
 
-async function fetchOilHistory() {
-  const apiKey = process.env.OILPRICE_API_KEY;
-  if (!apiKey) {
-    throw new Error("OILPRICE_API_KEY is not set");
-  }
+const OWNER = "jovylle";
+const REPO = "hormuzstrait";
+const BRANCH = "master";
+const PATH = "data/oil-history.json";
 
-  const res = await fetch(API_URL, {
-    headers: {
-      Authorization: `Token ${apiKey}`,
-      Accept: "application/json",
-    },
+/**
+ * Canonical oil series: committed `data/oil-history.json`, updated once daily
+ * (GitHub Actions) or locally via `npm run update-oil`. Site does not call
+ * OilPrice on every page load.
+ */
+async function fetchOilHistoryFromGitHub() {
+  const url = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${PATH}`;
+  const res = await fetch(url, {
+    headers: { Accept: "application/json" },
   });
 
+  if (res.status === 404) {
+    return [];
+  }
+
   if (!res.ok) {
-    throw new Error(`OilPrice API error: ${res.status}`);
+    throw new Error(`GitHub raw oil-history failed: ${res.status}`);
   }
 
-  const json = await res.json();
-  const prices = json?.data?.prices ?? [];
-
-  // Reduce to one value per UTC date (last price seen for that date)
-  const byDate = new Map();
-  for (const p of prices) {
-    if (!p || typeof p.price !== "number" || !p.created_at) continue;
-    // Normalise to YYYY-MM-DD in UTC to match our history dates
-    const date = new Date(p.created_at).toISOString().slice(0, 10);
-    byDate.set(date, p.price);
+  const text = await res.text();
+  try {
+    const json = JSON.parse(text);
+    return Array.isArray(json) ? json : [];
+  } catch {
+    return [];
   }
+}
 
-  return Array.from(byDate.entries())
-    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
-    .map(([date, brent]) => ({ date, brent }));
+function readLocalOilFile() {
+  try {
+    const p = join(process.cwd(), "data", "oil-history.json");
+    if (!existsSync(p)) return [];
+    const json = JSON.parse(readFileSync(p, "utf8"));
+    return Array.isArray(json) ? json : [];
+  } catch {
+    return [];
+  }
 }
 
 export async function handler(event) {
@@ -43,12 +54,22 @@ export async function handler(event) {
   }
 
   try {
-    const history = await fetchOilHistory();
+    const localHistory = readLocalOilFile();
+    let history = [];
+    if (process.env.NETLIFY_DEV) {
+      history = localHistory;
+    } else {
+      history = await fetchOilHistoryFromGitHub();
+      if (!history.length) {
+        history = localHistory;
+      }
+    }
+
     return {
       statusCode: 200,
       headers: {
         "Content-Type": "application/json",
-        "Cache-Control": "public, max-age=600",
+        "Cache-Control": "public, max-age=3600",
       },
       body: JSON.stringify(history),
     };
@@ -59,4 +80,3 @@ export async function handler(event) {
     };
   }
 }
-

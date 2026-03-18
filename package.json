@@ -1,0 +1,10 @@
+{
+  "name": "hormuzstrait",
+  "private": true,
+  "description": "Hormuz Traffic Monitor — ship history + oil price snapshots",
+  "scripts": {
+    "update-ships": "node scripts/update-history.mjs",
+    "update-oil": "node scripts/update-oil-history.mjs",
+    "update-data": "node scripts/update-history.mjs && node scripts/update-oil-history.mjs"
+  }
+}

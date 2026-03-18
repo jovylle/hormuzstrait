@@ -1,0 +1,90 @@
+/**
+ * Merges OilPrice past_month into data/oil-history.json (our persisted copy).
+ * Run locally: npm run update-oil  (needs OILPRICE_API_KEY in .env)
+ * Daily: GitHub Actions (repo secret OILPRICE_API_KEY).
+ */
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const API_URL = "https://api.oilpriceapi.com/v1/prices/past_month";
+const OUT_PATH = path.resolve(__dirname, "..", "data", "oil-history.json");
+const MAX_DAYS = 45;
+
+async function main() {
+  const apiKey = process.env.OILPRICE_API_KEY;
+  if (!apiKey) {
+    console.warn("OILPRICE_API_KEY missing — skip oil history update");
+    process.exit(0);
+  }
+
+  const res = await fetch(API_URL, {
+    headers: {
+      Authorization: `Token ${apiKey}`,
+      Accept: "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    console.error("OilPrice API error:", res.status);
+    process.exit(1);
+  }
+
+  const json = await res.json();
+  const prices = json?.data?.prices ?? [];
+
+  // One Brent per UTC day: average intraday ticks (API often returns many rows for only recent days)
+  const buckets = new Map();
+  for (const p of prices) {
+    if (!p || typeof p.price !== "number" || !p.created_at) continue;
+    const date = new Date(p.created_at).toISOString().slice(0, 10);
+    if (!buckets.has(date)) buckets.set(date, []);
+    buckets.get(date).push(p.price);
+  }
+
+  const fromApi = [];
+  for (const [date, arr] of buckets) {
+    const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
+    fromApi.push({
+      date,
+      brent: Math.round(avg * 100) / 100,
+    });
+  }
+  fromApi.sort((a, b) => (a.date < b.date ? -1 : 1));
+
+  let existing = [];
+  try {
+    const raw = fs.readFileSync(OUT_PATH, "utf8");
+    existing = JSON.parse(raw);
+    if (!Array.isArray(existing)) existing = [];
+  } catch {
+    existing = [];
+  }
+
+  const byDate = new Map();
+  for (const row of existing) {
+    if (row?.date && typeof row.brent === "number") byDate.set(row.date, row.brent);
+  }
+  for (const row of fromApi) {
+    byDate.set(row.date, row.brent);
+  }
+
+  let merged = Array.from(byDate.entries())
+    .map(([date, brent]) => ({ date, brent }))
+    .sort((a, b) => (a.date < b.date ? -1 : 1));
+
+  if (merged.length > MAX_DAYS) {
+    merged = merged.slice(-MAX_DAYS);
+  }
+
+  fs.writeFileSync(OUT_PATH, JSON.stringify(merged, null, 2) + "\n", "utf8");
+  console.log("Oil history:", merged.length, "days, latest", merged.at(-1));
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
