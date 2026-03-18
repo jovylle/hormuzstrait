@@ -753,6 +753,23 @@
       }
 
       @media (max-width: 640px) {
+        header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px;
+        }
+
+        .nav {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 8px;
+          font-size: 0.85rem;
+        }
+
+        .theme-toggle {
+          align-self: flex-start;
+        }
+
         .chart-hint,
         .metric-hint,
         .impact-note {
