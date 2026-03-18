@@ -44,7 +44,7 @@ async function main() {
 
   const updatedEntry = {
     date: today,
-    shipsLast24h: shipData.last24h ?? null,
+    shipsPassed: shipData.last24h ?? null,
   };
 
   const withoutToday = history.filter((d) => d.date !== today);

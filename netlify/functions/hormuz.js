@@ -33,11 +33,10 @@ export async function handler() {
     const json = await res.json();
     const rootData = json?.data ?? {};
     const shipData = rootData?.shipCount ?? {};
-
-    const shipsLast24h = shipData.last24h ?? null;
+    const shipsPassed = shipData.last24h ?? null;
     const percentOfNormal =
-      typeof shipsLast24h === "number"
-        ? (shipsLast24h / BASELINE_NORMAL_DAILY) * 100
+      typeof shipsPassed === "number"
+        ? (shipsPassed / BASELINE_NORMAL_DAILY) * 100
         : null;
 
     return {
@@ -47,7 +46,8 @@ export async function handler() {
         "Cache-Control": "public, max-age=60", // small cache to avoid hammering origin
       },
       body: JSON.stringify({
-        shipsLast24h,
+        shipsPassed,
+        shipsLast24h: shipsPassed,
         currentTransits: shipData.currentTransits ?? null,
         normalDaily: BASELINE_NORMAL_DAILY,
         percentOfNormal,

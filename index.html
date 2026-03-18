@@ -625,7 +625,7 @@
             <div class="metrics">
               <div class="metric">
                 <div class="metric-label">Ships today</div>
-                <div class="metric-value" id="shipsLast24h">—</div>
+                <div class="metric-value" id="shipsPassed">—</div>
                 <div class="metric-hint" title="Total ships recorded over the last 24 hours.">
                   Total ships in the last 24 hours
                 </div>
@@ -788,7 +788,7 @@
         const labels = history.map((d, idx) =>
           idx === history.length - 1 ? "Today" : d.date.slice(5)
         );
-        const ships = history.map((d) => d.shipsLast24h ?? null);
+        const ships = history.map((d) => d.shipsPassed ?? d.shipsLast24h ?? null);
         const normal = history.map(() => BASELINE_NORMAL_DAILY);
 
         let oilPoints = [];
@@ -932,7 +932,7 @@
       }
 
       async function loadHormuzData() {
-        const shipsLast24hEl = document.getElementById("shipsLast24h");
+        const shipsPassedEl = document.getElementById("shipsPassed");
         const currentTransitsEl = document.getElementById("currentTransits");
         const normalDailyEl = document.getElementById("normalDaily");
         const percentOfNormalEl = document.getElementById("percentOfNormal");
@@ -962,15 +962,17 @@
 
           const data = await res.json();
 
-          const shipsLast24h = data.shipsLast24h;
+          const shipsPassed = data.shipsPassed ?? data.shipsLast24h;
           const currentTransits = data.currentTransits;
           const normalDaily = data.normalDaily;
           const percentOfNormal = data.percentOfNormal;
           latestShipCount =
-            typeof shipsLast24h === "number" ? shipsLast24h : null;
+            typeof shipsPassed === "number" ? shipsPassed : null;
 
-          shipsLast24hEl.textContent =
-            shipsLast24h != null ? shipsLast24h.toLocaleString() : "—";
+          if (shipsPassedEl) {
+            shipsPassedEl.textContent =
+              shipsPassed != null ? shipsPassed.toLocaleString() : "—";
+          }
           currentTransitsEl.textContent =
             currentTransits != null ? currentTransits.toLocaleString() : "—";
           normalDailyEl.textContent =
