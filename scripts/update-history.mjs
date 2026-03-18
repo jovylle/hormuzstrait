@@ -9,7 +9,9 @@ const HISTORY_PATH = path.resolve(__dirname, "..", "data", "hormuz-history.json"
 const DASHBOARD_URL = "https://hormuzstraitmonitor.com/api/dashboard";
 
 async function main() {
-  const today = new Date().toISOString().slice(0, 10);
+  const utcYesterday = new Date();
+  utcYesterday.setUTCDate(utcYesterday.getUTCDate() - 1);
+  const targetDate = utcYesterday.toISOString().slice(0, 10);
 
   const res = await fetch(DASHBOARD_URL, {
     headers: {
@@ -43,7 +45,7 @@ async function main() {
   }
 
   const updatedEntry = {
-    date: today,
+    date: targetDate,
     shipsPassed: shipData.last24h ?? null,
   };
 

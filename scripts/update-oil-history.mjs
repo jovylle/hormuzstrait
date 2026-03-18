@@ -55,6 +55,11 @@ async function main() {
   }
   fromApi.sort((a, b) => (a.date < b.date ? -1 : 1));
 
+  const utcYesterday = new Date();
+  utcYesterday.setUTCDate(utcYesterday.getUTCDate() - 1);
+  const cutoffDate = utcYesterday.toISOString().slice(0, 10);
+  const trimmedApi = fromApi.filter((row) => row.date <= cutoffDate);
+
   let existing = [];
   try {
     const raw = fs.readFileSync(OUT_PATH, "utf8");
@@ -68,7 +73,7 @@ async function main() {
   for (const row of existing) {
     if (row?.date && typeof row.brent === "number") byDate.set(row.date, row.brent);
   }
-  for (const row of fromApi) {
+  for (const row of trimmedApi) {
     byDate.set(row.date, row.brent);
   }
 
