@@ -32,16 +32,18 @@
     />
     <style>
       :root {
-        color-scheme: dark;
-        --bg: #050913;
-        --card-bg: #0b1020;
-        --accent: #4fd1c5;
-        --accent-soft: rgba(79, 209, 197, 0.3);
-        --danger: #f56565;
-        --warning: #ecc94b;
-        --safe: #48bb78;
-        --text: #e2e8f0;
-        --muted: #718096;
+        color-scheme: light;
+        --bg: #f8fafc;
+        --card-bg: #ffffff;
+        --accent: #0ea5e9;
+        --accent-solid: #4fd1c5;
+        --accent-warm: #fbbf24;
+        --danger: #dc2626;
+        --warning: #f59e0b;
+        --safe: #16a34a;
+        --text: #0f172a;
+        --muted: #475569;
+        --border: rgba(15, 23, 42, 0.08);
       }
 
       * {
@@ -52,25 +54,25 @@
 
       body {
         min-height: 100vh;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        font-family: "Inter", "SF Pro Text", system-ui, -apple-system, BlinkMacSystemFont,
           sans-serif;
-        background: radial-gradient(circle at top, #111827 0, #050913 55%);
+        background: linear-gradient(180deg, #e2e8f0 0, #f8fafc 80%);
         color: var(--text);
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 24px;
+        padding: 32px;
       }
 
       .shell {
         width: 100%;
-        max-width: 960px;
-        background: linear-gradient(135deg, #111827, #020617);
-        border-radius: 24px;
-        padding: 24px 24px 28px;
+        max-width: 1080px;
+        background: var(--card-bg);
+        border-radius: 28px;
+        padding: 28px;
         box-shadow:
-          0 32px 80px rgba(0, 0, 0, 0.8),
-          0 0 0 1px rgba(148, 163, 184, 0.1);
+          0 20px 45px rgba(15, 23, 42, 0.18),
+          inset 0 0 0 1px var(--border);
         position: relative;
         overflow: hidden;
       }
@@ -78,11 +80,10 @@
       .shell::before {
         content: "";
         position: absolute;
-        inset: -40%;
+        inset: -30%;
         background:
-          radial-gradient(circle at 0% 0%, rgba(79, 209, 197, 0.09), transparent 55%),
-          radial-gradient(circle at 100% 100%, rgba(248, 113, 113, 0.06), transparent 55%);
-        opacity: 0.9;
+          radial-gradient(circle at 0% 0%, rgba(14, 165, 233, 0.15), transparent 55%),
+          radial-gradient(circle at 100% 100%, rgba(251, 191, 36, 0.12), transparent 55%);
         pointer-events: none;
       }
 
@@ -103,7 +104,7 @@
         font-size: 1.4rem;
         letter-spacing: 0.06em;
         text-transform: uppercase;
-        color: #e5e7eb;
+        color: #0f172a;
       }
 
       .title-block p {
@@ -118,8 +119,8 @@
         gap: 8px;
         padding: 6px 10px;
         border-radius: 999px;
-        background: rgba(15, 23, 42, 0.9);
-        border: 1px solid rgba(148, 163, 184, 0.3);
+        background: rgba(14, 165, 233, 0.15);
+        border: 1px solid rgba(14, 165, 233, 0.35);
         font-size: 0.75rem;
         color: var(--muted);
       }
@@ -128,8 +129,8 @@
         width: 8px;
         height: 8px;
         border-radius: 999px;
-        background: #22c55e;
-        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.3);
+        background: linear-gradient(135deg, #34d399, #0ea5e9);
+        box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.25);
       }
 
       main {
@@ -145,11 +146,11 @@
       }
 
       .card {
-        background: rgba(15, 23, 42, 0.85);
+        background: var(--card-bg);
         border-radius: 18px;
         padding: 16px 16px 18px;
-        border: 1px solid rgba(148, 163, 184, 0.15);
-        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
       }
 
       .card-header {
@@ -179,10 +180,10 @@
       }
 
       .metric {
-        background: rgba(15, 23, 42, 0.85);
+        background: rgba(148, 163, 184, 0.05);
         border-radius: 14px;
         padding: 10px 10px 11px;
-        border: 1px solid rgba(148, 163, 184, 0.2);
+        border: 1px solid rgba(15, 23, 42, 0.08);
       }
 
       .metric-label {
@@ -323,8 +324,8 @@
         padding: 4px 10px;
         border-radius: 999px;
         font-size: 0.78rem;
-        border: 1px solid rgba(148, 163, 184, 0.4);
-        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        background: rgba(248, 250, 252, 0.75);
       }
 
       .chip-label {
@@ -545,8 +546,8 @@
         min-width: 220px;
         padding: 16px 18px;
         border-radius: 16px;
-        background: rgba(15, 23, 42, 0.9);
-        border: 1px solid rgba(148, 163, 184, 0.35);
+        background: rgba(14, 165, 233, 0.08);
+        border: 1px solid rgba(14, 165, 233, 0.25);
         display: flex;
         flex-direction: column;
         gap: 4px;
