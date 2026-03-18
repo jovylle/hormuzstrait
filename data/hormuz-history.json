@@ -26,6 +26,5 @@
   { "date": "2026-03-14", "shipsPassed": 0 },
   { "date": "2026-03-15", "shipsPassed": 1 },
   { "date": "2026-03-16", "shipsPassed": 2 },
-  { "date": "2026-03-17", "shipsPassed": 2 },
-  { "date": "2026-03-18", "shipsPassed": 2 }
+  { "date": "2026-03-17", "shipsPassed": 2 }
 ]
