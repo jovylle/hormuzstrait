@@ -1084,8 +1084,7 @@
                     const idx = items[0].dataIndex;
                     const full = history[idx]?.date;
                     if (!full) return items[0].label;
-                    const isToday = idx === history.length - 1;
-                    return isToday ? `${full} (today)` : full;
+                    return full;
                   },
                   afterBody(items) {
                     if (!items?.length) return;
