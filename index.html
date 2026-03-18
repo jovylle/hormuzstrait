@@ -719,8 +719,9 @@
       const BASELINE_NORMAL_DAILY = 60;
       let trafficChart;
       let fullHistory = [];
+      let oilHistory = [];
 
-      function renderChart(history) {
+      function renderChart(history, oil) {
         const ctx = document.getElementById("trafficChart");
         if (!ctx || !window.Chart) return;
 
@@ -729,6 +730,14 @@
         );
         const ships = history.map((d) => d.shipsLast24h ?? null);
         const normal = history.map(() => BASELINE_NORMAL_DAILY);
+
+        let oilPoints = [];
+        if (Array.isArray(oil) && oil.length) {
+          const oilByDate = new Map(oil.map((o) => [o.date, o.brent]));
+          oilPoints = history.map((d) =>
+            oilByDate.has(d.date) ? oilByDate.get(d.date) : null
+          );
+        }
 
         const todayBadge = document.getElementById("todayBadge");
         const todayBadgeText = document.getElementById("todayBadgeText");
@@ -742,6 +751,9 @@
           trafficChart.data.labels = labels;
           trafficChart.data.datasets[0].data = ships;
           trafficChart.data.datasets[1].data = normal;
+          if (trafficChart.data.datasets[2]) {
+            trafficChart.data.datasets[2].data = oilPoints;
+          }
           trafficChart.update();
           return;
         }
@@ -770,6 +782,16 @@
                 tension: 0.1,
                 pointRadius: 0,
                 fill: false,
+                yAxisID: "y",
+              },
+              {
+                label: "Brent oil price (USD/bbl)",
+                data: oilPoints,
+                borderColor: "#fbbf24",
+                tension: 0.25,
+                pointRadius: 0,
+                fill: false,
+                yAxisID: "y1",
               },
             ],
           },
@@ -803,6 +825,11 @@
               y: {
                 ticks: { color: "#a0aec0", font: { size: 10 } },
                 grid: { color: "rgba(148, 163, 184, 0.12)" },
+              },
+              y1: {
+                position: "right",
+                ticks: { color: "#fbbf24", font: { size: 10 } },
+                grid: { display: false },
               },
             },
           },
@@ -927,16 +954,20 @@
 
       async function loadHistory() {
         try {
-          const res = await fetch("/.netlify/functions/history", {
-            cache: "no-store",
-          });
-          if (!res.ok) return;
-          const history = await res.json();
+          const [shipsRes, oilRes] = await Promise.all([
+            fetch("/.netlify/functions/history", { cache: "no-store" }),
+            fetch("/.netlify/functions/oil-history", { cache: "no-store" }),
+          ]);
+          if (!shipsRes.ok) return;
+          const history = await shipsRes.json();
+          if (oilRes.ok) {
+            oilHistory = await oilRes.json();
+          }
           if (Array.isArray(history) && history.length) {
             fullHistory = history.slice().sort((a, b) =>
               a.date < b.date ? -1 : a.date > b.date ? 1 : 0
             );
-            renderChart(getHistorySlice(30));
+            renderChart(getHistorySlice(30), oilHistory);
           }
         } catch (e) {
           // fail silently – snapshot UI still useful without history
@@ -962,7 +993,7 @@
           Array.from(chartRangeEl.querySelectorAll("button")).forEach((b) =>
             b.classList.toggle("active", b === btn)
           );
-          renderChart(getHistorySlice(range));
+          renderChart(getHistorySlice(range), oilHistory);
         });
       }
     </script>
