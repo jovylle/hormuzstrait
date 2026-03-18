@@ -1,4 +1,4 @@
-const BASELINE_NORMAL_DAILY = 130;
+const BASELINE_NORMAL_DAILY = 60;
 
 export async function handler() {
   try {
