@@ -24,7 +24,8 @@ async function fetchOilHistory() {
   const byDate = new Map();
   for (const p of prices) {
     if (!p || typeof p.price !== "number" || !p.created_at) continue;
-    const date = p.created_at.slice(0, 10); // YYYY-MM-DD
+    // Normalise to YYYY-MM-DD in UTC to match our history dates
+    const date = new Date(p.created_at).toISOString().slice(0, 10);
     byDate.set(date, p.price);
   }
 
