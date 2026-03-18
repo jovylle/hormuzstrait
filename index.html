@@ -605,10 +605,6 @@
             <div class="chart-hint">
               Ship counts at traffic snapshot. Crude oil data is stored in the repo and updated daily (or locally with <code>npm run update-oil</code>).
             </div>
-            <div class="today-pill" id="todayBadge" style="margin-top: 4px; display: none">
-              <span class="today-dot"></span>
-              <span id="todayBadgeText"></span>
-            </div>
           </section>
 
           <section class="card">
@@ -785,9 +781,7 @@
         const ctx = document.getElementById("trafficChart");
         if (!ctx || !window.Chart) return;
 
-        const labels = history.map((d, idx) =>
-          idx === history.length - 1 ? "Today" : d.date.slice(5)
-        );
+        const labels = history.map((d) => d.date.slice(5));
         const ships = history.map((d) => d.shipsPassed ?? d.shipsLast24h ?? null);
         const normal = history.map(() => BASELINE_NORMAL_DAILY);
 
@@ -797,14 +791,6 @@
           oilPoints = history.map((d) =>
             oilByDate.has(d.date) ? oilByDate.get(d.date) : null
           );
-        }
-
-        const todayBadge = document.getElementById("todayBadge");
-        const todayBadgeText = document.getElementById("todayBadgeText");
-        if (history.length && todayBadge && todayBadgeText) {
-          const latest = history[history.length - 1];
-          todayBadge.style.display = "inline-flex";
-          todayBadgeText.textContent = `Today: ${latest.date}`;
         }
 
         if (trafficChart) {
@@ -1078,9 +1064,10 @@
       }
 
       function getHistorySlice(range) {
-        if (!Array.isArray(fullHistory) || !fullHistory.length) return [];
-        if (!range || range >= fullHistory.length) return fullHistory;
-        return fullHistory.slice(-range);
+        if (!Array.isArray(fullHistory) || fullHistory.length <= 1) return [];
+        const withoutToday = fullHistory.slice(0, fullHistory.length - 1);
+        if (!range || range >= withoutToday.length) return withoutToday;
+        return withoutToday.slice(-range);
       }
 
       loadHistory();
