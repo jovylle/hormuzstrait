@@ -1064,10 +1064,12 @@
       }
 
       function getHistorySlice(range) {
-        if (!Array.isArray(fullHistory) || fullHistory.length <= 1) return [];
-        const withoutToday = fullHistory.slice(0, fullHistory.length - 1);
-        if (!range || range >= withoutToday.length) return withoutToday;
-        return withoutToday.slice(-range);
+        if (!Array.isArray(fullHistory) || !fullHistory.length) return [];
+        const today = new Date().toISOString().slice(0, 10);
+        const completed = fullHistory.filter((d) => d.date < today);
+        if (!completed.length) return [];
+        if (!range || range >= completed.length) return completed;
+        return completed.slice(-range);
       }
 
       loadHistory();
