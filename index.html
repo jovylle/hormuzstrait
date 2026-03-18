@@ -372,12 +372,22 @@
         background: rgba(248, 250, 252, 0.75);
       }
 
+      :root[data-theme="dark"] .chip {
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        background: rgba(15, 23, 42, 0.78);
+        color: var(--text);
+      }
+
       .chip-label {
         font-weight: 500;
       }
 
       .chip-value {
         color: var(--muted);
+      }
+
+      :root[data-theme="dark"] .chip-value {
+        color: rgba(226, 232, 240, 0.82);
       }
 
       .chip-help {
