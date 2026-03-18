@@ -715,6 +715,7 @@
         };
       }
 
+      const BASELINE_NORMAL_DAILY = 130;
       let trafficChart;
       let fullHistory = [];
 
@@ -726,7 +727,7 @@
           idx === history.length - 1 ? "Today" : d.date.slice(5)
         );
         const ships = history.map((d) => d.shipsLast24h ?? null);
-        const normal = history.map((d) => d.normalDaily ?? null);
+        const normal = history.map(() => BASELINE_NORMAL_DAILY);
 
         const todayBadge = document.getElementById("todayBadge");
         const todayBadgeText = document.getElementById("todayBadgeText");

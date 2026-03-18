@@ -6,6 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const HISTORY_PATH = path.resolve(__dirname, "..", "data", "hormuz-history.json");
+const BASELINE_NORMAL_DAILY = 130;
 const DASHBOARD_URL = "https://hormuzstraitmonitor.com/api/dashboard";
 
 async function main() {
@@ -42,11 +43,16 @@ async function main() {
     history = [];
   }
 
+  const shipsLast24h = shipData.last24h ?? null;
+  const percentOfNormal =
+    typeof shipsLast24h === "number"
+      ? (shipsLast24h / BASELINE_NORMAL_DAILY) * 100
+      : null;
+
   const updatedEntry = {
     date: today,
-    shipsLast24h: shipData.last24h ?? null,
-    normalDaily: shipData.normalDaily ?? null,
-    percentOfNormal: shipData.percentOfNormal ?? null,
+    shipsLast24h,
+    percentOfNormal,
   };
 
   const withoutToday = history.filter((d) => d.date !== today);
