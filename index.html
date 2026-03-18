@@ -46,6 +46,21 @@
         --border: rgba(15, 23, 42, 0.08);
       }
 
+      :root[data-theme="dark"] {
+        color-scheme: dark;
+        --bg: #050913;
+        --card-bg: rgba(15, 23, 42, 0.92);
+        --accent: #4fd1c5;
+        --accent-solid: #4fd1c5;
+        --accent-warm: #fbbf24;
+        --danger: #f56565;
+        --warning: #ecc94b;
+        --safe: #48bb78;
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --border: rgba(148, 163, 184, 0.18);
+      }
+
       * {
         box-sizing: border-box;
         margin: 0;
@@ -64,6 +79,10 @@
         padding: 32px;
       }
 
+      :root[data-theme="dark"] body {
+        background: radial-gradient(circle at top, #111827 0, #050913 55%);
+      }
+
       .shell {
         width: 100%;
         max-width: 1080px;
@@ -77,6 +96,13 @@
         overflow: hidden;
       }
 
+      :root[data-theme="dark"] .shell {
+        background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(2, 6, 23, 0.98));
+        box-shadow:
+          0 32px 80px rgba(0, 0, 0, 0.7),
+          inset 0 0 0 1px var(--border);
+      }
+
       .shell::before {
         content: "";
         position: absolute;
@@ -85,6 +111,12 @@
           radial-gradient(circle at 0% 0%, rgba(14, 165, 233, 0.15), transparent 55%),
           radial-gradient(circle at 100% 100%, rgba(251, 191, 36, 0.12), transparent 55%);
         pointer-events: none;
+      }
+
+      :root[data-theme="dark"] .shell::before {
+        background:
+          radial-gradient(circle at 0% 0%, rgba(79, 209, 197, 0.11), transparent 55%),
+          radial-gradient(circle at 100% 100%, rgba(248, 113, 113, 0.07), transparent 55%);
       }
 
       .shell-inner {
@@ -151,6 +183,11 @@
         padding: 16px 16px 18px;
         border: 1px solid rgba(15, 23, 42, 0.08);
         box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+      }
+
+      :root[data-theme="dark"] .card {
+        border: 1px solid rgba(148, 163, 184, 0.16);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
       }
 
       .card-header {
@@ -536,6 +573,22 @@
         text-decoration: underline;
       }
 
+      .theme-toggle {
+        border-radius: 999px;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        background: rgba(248, 250, 252, 0.9);
+        color: var(--text);
+        padding: 6px 10px;
+        font-size: 0.75rem;
+        cursor: pointer;
+      }
+
+      :root[data-theme="dark"] .theme-toggle {
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        background: rgba(15, 23, 42, 0.75);
+        color: var(--text);
+      }
+
       .summary-card {
         margin: 0 0 20px;
         display: flex;
@@ -653,6 +706,9 @@
               <div class="badge-dot"></div>
               Live feed · 1 min cache
             </div>
+            <button class="theme-toggle" id="themeToggle" type="button">
+              Dark mode
+            </button>
             <a href="about.html">About this data</a>
           </div>
         </header>
@@ -830,6 +886,60 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script>
+      const themeToggle = document.getElementById("themeToggle");
+      const THEME_KEY = "htm-theme";
+
+      function getTheme() {
+        const saved = localStorage.getItem(THEME_KEY);
+        if (saved === "dark" || saved === "light") return saved;
+        return "light";
+      }
+
+      function applyTheme(theme) {
+        document.documentElement.dataset.theme = theme === "dark" ? "dark" : "light";
+        if (themeToggle) themeToggle.textContent = theme === "dark" ? "Light mode" : "Dark mode";
+      }
+
+      function getChartTheme(theme) {
+        if (theme === "dark") {
+          return {
+            legend: "#e2e8f0",
+            tick: "#a0aec0",
+            gridX: "rgba(148, 163, 184, 0.15)",
+            gridY: "rgba(148, 163, 184, 0.12)",
+            oilTick: "#fbbf24",
+          };
+        }
+        return {
+          legend: "#0f172a",
+          tick: "#334155",
+          gridX: "rgba(15, 23, 42, 0.08)",
+          gridY: "rgba(15, 23, 42, 0.06)",
+          oilTick: "#b45309",
+        };
+      }
+
+      function applyChartTheme() {
+        if (!window.Chart || !trafficChart) return;
+        const t = getChartTheme(getTheme());
+        trafficChart.options.plugins.legend.labels.color = t.legend;
+        trafficChart.options.scales.x.ticks.color = t.tick;
+        trafficChart.options.scales.x.grid.color = t.gridX;
+        trafficChart.options.scales.y.ticks.color = t.tick;
+        trafficChart.options.scales.y.grid.color = t.gridY;
+        trafficChart.options.scales.y1.ticks.color = t.oilTick;
+        trafficChart.update();
+      }
+
+      applyTheme(getTheme());
+
+      themeToggle?.addEventListener("click", () => {
+        const next = getTheme() === "dark" ? "light" : "dark";
+        localStorage.setItem(THEME_KEY, next);
+        applyTheme(next);
+        applyChartTheme();
+      });
+
       const feedbackToggle = document.getElementById("feedbackToggle");
       const feedbackPanel = document.getElementById("feedbackPanel");
       const feedbackClose = document.getElementById("feedbackClose");
@@ -964,7 +1074,7 @@
               legend: {
                 onClick: null,
                 labels: {
-                  color: "#0f172a",
+                  color: getChartTheme(getTheme()).legend,
                   font: { size: 11 },
                 },
               },
@@ -992,21 +1102,23 @@
             },
             scales: {
               x: {
-                ticks: { color: "#334155", font: { size: 10 } },
-                grid: { color: "rgba(15, 23, 42, 0.08)" },
+                ticks: { color: getChartTheme(getTheme()).tick, font: { size: 10 } },
+                grid: { color: getChartTheme(getTheme()).gridX },
               },
               y: {
-                ticks: { color: "#334155", font: { size: 10 } },
-                grid: { color: "rgba(15, 23, 42, 0.06)" },
+                ticks: { color: getChartTheme(getTheme()).tick, font: { size: 10 } },
+                grid: { color: getChartTheme(getTheme()).gridY },
               },
               y1: {
                 position: "right",
-                ticks: { color: "#b45309", font: { size: 10 } },
+                ticks: { color: getChartTheme(getTheme()).oilTick, font: { size: 10 } },
                 grid: { display: false },
               },
             },
           },
         });
+
+        applyChartTheme();
       }
 
       function getLatestOilVisible() {
