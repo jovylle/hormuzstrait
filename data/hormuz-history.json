@@ -1,30 +1,118 @@
 [
-  { "date": "2026-02-18", "shipsPassed": 56 },
-  { "date": "2026-02-19", "shipsPassed": 58 },
-  { "date": "2026-02-20", "shipsPassed": 55 },
-  { "date": "2026-02-21", "shipsPassed": 59 },
-  { "date": "2026-02-22", "shipsPassed": 57 },
-  { "date": "2026-02-23", "shipsPassed": 58 },
-  { "date": "2026-02-24", "shipsPassed": 56 },
-  { "date": "2026-02-25", "shipsPassed": 60 },
-  { "date": "2026-02-26", "shipsPassed": 57 },
-  { "date": "2026-02-27", "shipsPassed": 55 },
-  { "date": "2026-02-28", "shipsPassed": 46 },
-  { "date": "2026-03-01", "shipsPassed": 6 },
-  { "date": "2026-03-02", "shipsPassed": 0 },
-  { "date": "2026-03-03", "shipsPassed": 2 },
-  { "date": "2026-03-04", "shipsPassed": 3 },
-  { "date": "2026-03-05", "shipsPassed": 4 },
-  { "date": "2026-03-06", "shipsPassed": 3 },
-  { "date": "2026-03-07", "shipsPassed": 3 },
-  { "date": "2026-03-08", "shipsPassed": 1 },
-  { "date": "2026-03-09", "shipsPassed": 2 },
-  { "date": "2026-03-10", "shipsPassed": 4 },
-  { "date": "2026-03-11", "shipsPassed": 3 },
-  { "date": "2026-03-12", "shipsPassed": 1 },
-  { "date": "2026-03-13", "shipsPassed": 1 },
-  { "date": "2026-03-14", "shipsPassed": 0 },
-  { "date": "2026-03-15", "shipsPassed": 1 },
-  { "date": "2026-03-16", "shipsPassed": 2 },
-  { "date": "2026-03-17", "shipsPassed": 2 }
+  {
+    "date": "2026-02-18",
+    "shipsPassed": 56
+  },
+  {
+    "date": "2026-02-19",
+    "shipsPassed": 58
+  },
+  {
+    "date": "2026-02-20",
+    "shipsPassed": 55
+  },
+  {
+    "date": "2026-02-21",
+    "shipsPassed": 59
+  },
+  {
+    "date": "2026-02-22",
+    "shipsPassed": 57
+  },
+  {
+    "date": "2026-02-23",
+    "shipsPassed": 58
+  },
+  {
+    "date": "2026-02-24",
+    "shipsPassed": 56
+  },
+  {
+    "date": "2026-02-25",
+    "shipsPassed": 60
+  },
+  {
+    "date": "2026-02-26",
+    "shipsPassed": 57
+  },
+  {
+    "date": "2026-02-27",
+    "shipsPassed": 55
+  },
+  {
+    "date": "2026-02-28",
+    "shipsPassed": 46
+  },
+  {
+    "date": "2026-03-01",
+    "shipsPassed": 6
+  },
+  {
+    "date": "2026-03-02",
+    "shipsPassed": 0
+  },
+  {
+    "date": "2026-03-03",
+    "shipsPassed": 2
+  },
+  {
+    "date": "2026-03-04",
+    "shipsPassed": 3
+  },
+  {
+    "date": "2026-03-05",
+    "shipsPassed": 4
+  },
+  {
+    "date": "2026-03-06",
+    "shipsPassed": 3
+  },
+  {
+    "date": "2026-03-07",
+    "shipsPassed": 3
+  },
+  {
+    "date": "2026-03-08",
+    "shipsPassed": 1
+  },
+  {
+    "date": "2026-03-09",
+    "shipsPassed": 2
+  },
+  {
+    "date": "2026-03-10",
+    "shipsPassed": 4
+  },
+  {
+    "date": "2026-03-11",
+    "shipsPassed": 3
+  },
+  {
+    "date": "2026-03-12",
+    "shipsPassed": 1
+  },
+  {
+    "date": "2026-03-13",
+    "shipsPassed": 1
+  },
+  {
+    "date": "2026-03-14",
+    "shipsPassed": 0
+  },
+  {
+    "date": "2026-03-15",
+    "shipsPassed": 1
+  },
+  {
+    "date": "2026-03-16",
+    "shipsPassed": 2
+  },
+  {
+    "date": "2026-03-17",
+    "shipsPassed": 2
+  },
+  {
+    "date": "2026-03-18",
+    "shipsPassed": 5
+  }
 ]

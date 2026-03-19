@@ -49,13 +49,18 @@ async function main() {
     shipsPassed: shipData.last24h ?? null,
   };
 
-  const withoutToday = history.filter((d) => d.date !== today);
-  withoutToday.push(updatedEntry);
-  withoutToday.sort((a, b) => (a.date < b.date ? -1 : 1));
+  // We only persist UTC yesterday (the current day may be incomplete).
+  const withoutTargetDate = history.filter((d) => d.date !== targetDate);
+  withoutTargetDate.push(updatedEntry);
+  withoutTargetDate.sort((a, b) => (a.date < b.date ? -1 : 1));
 
-  fs.writeFileSync(HISTORY_PATH, JSON.stringify(withoutToday, null, 2) + "\n", "utf8");
+  fs.writeFileSync(
+    HISTORY_PATH,
+    JSON.stringify(withoutTargetDate, null, 2) + "\n",
+    "utf8",
+  );
 
-  console.log("Updated history for", today, ":", updatedEntry);
+  console.log("Updated history for", targetDate, ":", updatedEntry);
 }
 
 main().catch((err) => {
