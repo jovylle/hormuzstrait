@@ -14,7 +14,42 @@ const API_URL = "https://api.oilpriceapi.com/v1/prices/past_month";
 const OUT_PATH = path.resolve(__dirname, "..", "data", "oil-history.json");
 const MAX_DAYS = 45;
 
+function tryLoadOilApiKeyFromDotEnv() {
+  // `update-oil-history.mjs` relies on `process.env`, but locally users store the key in `.env`.
+  // GitHub Actions passes the secret directly as an environment variable.
+  if (process.env.OILPRICE_API_KEY) return;
+
+  const envPath = path.resolve(__dirname, "..", ".env");
+  let raw;
+  try {
+    raw = fs.readFileSync(envPath, "utf8");
+  } catch {
+    return;
+  }
+
+  for (const line of raw.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+
+    const m = trimmed.match(/^(?:export\s+)?OILPRICE_API_KEY=(.*)$/);
+    if (!m) continue;
+
+    let value = m[1].trim();
+    // Strip surrounding quotes: OILPRICE_API_KEY="..."
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+
+    if (value) process.env.OILPRICE_API_KEY = value;
+    return;
+  }
+}
+
 async function main() {
+  tryLoadOilApiKeyFromDotEnv();
   const apiKey = process.env.OILPRICE_API_KEY;
   if (!apiKey) {
     console.warn("OILPRICE_API_KEY missing — skip oil history update");
