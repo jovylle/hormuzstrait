@@ -1,4 +1,5 @@
 # Hormuz Traffic Monitor
+<img width="1247" height="964" alt="image" src="https://github.com/user-attachments/assets/9b1447ce-7023-4322-affa-2d56f1bcecb9" />
 
 ## Updating stored data
 
