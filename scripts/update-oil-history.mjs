@@ -13,6 +13,45 @@ const __dirname = path.dirname(__filename);
 const API_URL = "https://api.oilpriceapi.com/v1/prices/past_month";
 const OUT_PATH = path.resolve(__dirname, "..", "data", "oil-history.json");
 const MAX_DAYS = 45;
+const FETCH_MAX_ATTEMPTS = 5;
+/** Gateway timeouts and overload — safe to retry */
+const RETRYABLE_HTTP = new Set([408, 429, 500, 502, 503, 504]);
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchPastMonth(apiKey) {
+  let lastRes;
+  for (let attempt = 1; attempt <= FETCH_MAX_ATTEMPTS; attempt++) {
+    try {
+      lastRes = await fetch(API_URL, {
+        headers: {
+          Authorization: `Token ${apiKey}`,
+          Accept: "application/json",
+        },
+      });
+      if (lastRes.ok) return lastRes;
+      if (!RETRYABLE_HTTP.has(lastRes.status) || attempt === FETCH_MAX_ATTEMPTS) {
+        return lastRes;
+      }
+    } catch (err) {
+      if (attempt === FETCH_MAX_ATTEMPTS) throw err;
+      const backoff = Math.min(3000 * 2 ** (attempt - 1), 30_000);
+      console.warn(
+        `OilPrice request failed (${err.message}), attempt ${attempt}/${FETCH_MAX_ATTEMPTS}, waiting ${backoff}ms…`,
+      );
+      await sleep(backoff);
+      continue;
+    }
+    const backoff = Math.min(3000 * 2 ** (attempt - 1), 30_000);
+    console.warn(
+      `OilPrice API HTTP ${lastRes.status}, attempt ${attempt}/${FETCH_MAX_ATTEMPTS}, waiting ${backoff}ms…`,
+    );
+    await sleep(backoff);
+  }
+  return lastRes;
+}
 
 function tryLoadOilApiKeyFromDotEnv() {
   // `update-oil-history.mjs` relies on `process.env`, but locally users store the key in `.env`.
@@ -63,15 +102,10 @@ async function main() {
     process.exit(0);
   }
 
-  const res = await fetch(API_URL, {
-    headers: {
-      Authorization: `Token ${apiKey}`,
-      Accept: "application/json",
-    },
-  });
+  const res = await fetchPastMonth(apiKey);
 
   if (!res.ok) {
-    console.error("OilPrice API error:", res.status);
+    console.error("OilPrice API error:", res.status, "(after retries)");
     process.exit(1);
   }
 
