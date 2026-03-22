@@ -1,7 +1,7 @@
 /**
  * Merges OilPrice past_month into data/oil-history.json (our persisted copy).
  * Run locally: npm run update-oil  (needs OILPRICE_API_KEY in .env)
- * Daily: GitHub Actions (repo secret OILPRICE_API_KEY).
+ * Daily: workflow `.github/workflows/update-oil-history.yml` (secret OILPRICE_API_KEY).
  */
 import fs from "fs";
 import path from "path";
@@ -52,7 +52,14 @@ async function main() {
   tryLoadOilApiKeyFromDotEnv();
   const apiKey = process.env.OILPRICE_API_KEY;
   if (!apiKey) {
-    console.warn("OILPRICE_API_KEY missing — skip oil history update");
+    const inCi = process.env.GITHUB_ACTIONS === "true";
+    const msg =
+      "OILPRICE_API_KEY is not set. Add repository secret OILPRICE_API_KEY (Settings → Secrets and variables → Actions).";
+    if (inCi) {
+      console.error(msg);
+      process.exit(1);
+    }
+    console.warn("OILPRICE_API_KEY missing — skip oil history update (local only)");
     process.exit(0);
   }
 

@@ -1,12 +1,13 @@
-name: Update Hormuz history
+name: Update oil history
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "5 0 * * *"
+    # 15 minutes after ship history so pushes rarely collide; rebase below handles overlap.
+    - cron: "20 0 * * *"
 
 jobs:
-  update-history:
+  update-oil-history:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -19,19 +20,20 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Update ship history JSON
-        run: node scripts/update-history.mjs
+      - name: Update oil history JSON
+        env:
+          OILPRICE_API_KEY: ${{ secrets.OILPRICE_API_KEY }}
+        run: node scripts/update-oil-history.mjs
 
       - name: Commit and push if changed
         run: |
-          git add data/hormuz-history.json
+          git add data/oil-history.json
           if git diff --cached --quiet; then
             echo "No changes to commit."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore: update Hormuz history"
+          git commit -m "chore: update oil history"
           git pull --rebase origin master
           git push
-
