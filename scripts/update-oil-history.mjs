@@ -10,12 +10,14 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const API_URL = "https://api.oilpriceapi.com/v1/prices/past_month";
+/** Daily Brent only — tiny payload vs default `raw`, avoids frequent 504/524 timeouts */
+const API_URL =
+  "https://api.oilpriceapi.com/v1/prices/past_month?by_code=BRENT_CRUDE_USD&interval=1d";
 const OUT_PATH = path.resolve(__dirname, "..", "data", "oil-history.json");
 const MAX_DAYS = 45;
-const FETCH_MAX_ATTEMPTS = 5;
-/** Gateway timeouts and overload — safe to retry */
-const RETRYABLE_HTTP = new Set([408, 429, 500, 502, 503, 504]);
+const FETCH_MAX_ATTEMPTS = 6;
+/** Timeouts (504 gateway, 524 Cloudflare→origin), overload — safe to retry */
+const RETRYABLE_HTTP = new Set([408, 429, 500, 502, 503, 504, 524]);
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -51,6 +53,36 @@ async function fetchPastMonth(apiKey) {
     await sleep(backoff);
   }
   return lastRes;
+}
+
+function hintForOilPriceStatus(status) {
+  if (status === 524) {
+    return "524: Cloudflare timed out waiting for OilPrice’s server. Usually intermittent — re-run the job or `npm run update-oil` later.";
+  }
+  if (status === 504) {
+    return "504: Gateway timeout — origin didn’t answer in time. Usually intermittent — re-run the job or `npm run update-oil` later.";
+  }
+  if (status === 401 || status === 403) {
+    return "Auth failed — check OILPRICE_API_KEY.";
+  }
+  if (status === 429) {
+    return "Rate limited — wait and retry.";
+  }
+  return "";
+}
+
+async function logOilPriceFailure(res) {
+  const hint = hintForOilPriceStatus(res.status);
+  console.error(
+    `OilPrice API HTTP ${res.status}${res.statusText ? ` ${res.statusText}` : ""} (after ${FETCH_MAX_ATTEMPTS} attempts)`,
+  );
+  if (hint) console.error(hint);
+  try {
+    const text = await res.text();
+    if (text.trim()) console.error("Response body (truncated):", text.slice(0, 400));
+  } catch {
+    /* ignore */
+  }
 }
 
 function tryLoadOilApiKeyFromDotEnv() {
@@ -105,14 +137,14 @@ async function main() {
   const res = await fetchPastMonth(apiKey);
 
   if (!res.ok) {
-    console.error("OilPrice API error:", res.status, "(after retries)");
+    await logOilPriceFailure(res);
     process.exit(1);
   }
 
   const json = await res.json();
   const prices = json?.data?.prices ?? [];
 
-  // One Brent per UTC day: average intraday ticks (API often returns many rows for only recent days)
+  // One Brent per UTC day: with interval=1d this is already daily; averaging still handles duplicates
   const buckets = new Map();
   for (const p of prices) {
     if (!p || typeof p.price !== "number" || !p.created_at) continue;
