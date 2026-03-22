@@ -3,8 +3,8 @@ name: Update oil history
 on:
   workflow_dispatch:
   schedule:
-    # 15 minutes after ship history so pushes rarely collide; rebase below handles overlap.
-    - cron: "20 0 * * *"
+    # ~18:10 UTC: daily Brent bars for “yesterday” are usually published by then (00:20 UTC was too early).
+    - cron: "10 18 * * *"
 
 jobs:
   update-oil-history:

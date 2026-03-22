@@ -1,7 +1,7 @@
 /**
  * Merges OilPrice past_month into data/oil-history.json (our persisted copy).
  * Run locally: npm run update-oil  (needs OILPRICE_API_KEY in .env)
- * Daily: workflow `.github/workflows/update-oil-history.yml` (secret OILPRICE_API_KEY).
+ * Daily: `.github/workflows/update-oil-history.yml` (~18:10 UTC so prior-day Brent exists in the API).
  */
 import fs from "fs";
 import path from "path";
@@ -163,10 +163,22 @@ async function main() {
   }
   fromApi.sort((a, b) => (a.date < b.date ? -1 : 1));
 
-  const utcYesterday = new Date();
+  const now = new Date();
+  const todayUtcStr = now.toISOString().slice(0, 10);
+  const utcYesterday = new Date(now);
   utcYesterday.setUTCDate(utcYesterday.getUTCDate() - 1);
-  const cutoffDate = utcYesterday.toISOString().slice(0, 10);
-  const trimmedApi = fromApi.filter((row) => row.date <= cutoffDate);
+  const yesterdayUtcStr = utcYesterday.toISOString().slice(0, 10);
+
+  // Only drop the current UTC calendar day (often incomplete in daily feeds). Everything before
+  // that is treated as “done” for the chart; live “today” stays in your other UI.
+  const trimmedApi = fromApi.filter((row) => row.date < todayUtcStr);
+
+  const apiLatest = trimmedApi.at(-1)?.date;
+  if (apiLatest && apiLatest < yesterdayUtcStr) {
+    console.warn(
+      `OilPrice latest daily row is ${apiLatest} (UTC); calendar yesterday is ${yesterdayUtcStr}. Data may still be catching up — re-run later or wait for the next scheduled job.`,
+    );
+  }
 
   let existing = [];
   try {
