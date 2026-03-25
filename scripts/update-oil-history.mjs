@@ -199,22 +199,28 @@ async function main() {
     process.exit(0);
   }
 
-  const monthRes = await fetchOilEndpoint(apiKey, PAST_MONTH_URL);
-  if (!monthRes.ok) {
-    await logOilPriceFailure(monthRes);
-    process.exit(1);
-  }
-
   const buckets = new Map();
-  const monthJson = await monthRes.json();
-  addPricesToBuckets(buckets, monthJson?.data?.prices ?? []);
+  const monthRes = await fetchOilEndpoint(apiKey, PAST_MONTH_URL);
+  if (monthRes.ok) {
+    const monthJson = await monthRes.json();
+    addPricesToBuckets(buckets, monthJson?.data?.prices ?? []);
+  } else {
+    await logOilPriceFailure(monthRes);
+    console.warn(
+      "Continuing with existing oil-history.json + forward-fill fallback so daily save does not fail.",
+    );
+  }
 
   const weekRes = await fetchOilEndpoint(apiKey, PAST_WEEK_URL);
   if (weekRes.ok) {
     const weekJson = await weekRes.json();
     addPricesToBuckets(buckets, weekJson?.data?.prices ?? []);
   } else {
-    console.warn("OilPrice past_week request failed:", weekRes.status, "(continuing with past_month only)");
+    console.warn(
+      "OilPrice past_week request failed:",
+      weekRes.status,
+      "(continuing with past_month/existing history)",
+    );
   }
 
   const fromApi = bucketsToRows(buckets);
