@@ -262,5 +262,9 @@
   {
     "date": "2026-04-24",
     "shipsPassed": 5
+  },
+  {
+    "date": "2026-04-25",
+    "shipsPassed": 8
   }
 ]
